@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/env sh
 #//////////////////////////////////////////////////////////////////
 # Dan Fayette   mailto:fayetted@google.com                      ///
 # 20120620                                                      ///
@@ -33,14 +33,14 @@ memSize=`echo "scale=2; $memSize / 1000" | bc`
     # print it as a floating point with 2 decimal places.
 memSize=`echo "$memSize 1000" | awk '{if ($1 < 1000) print $1" MB"; else printf("%.2f%3s\n",$1/$2, "GB")}'`
 
-echo -e "OS_Version:\t $osVersion"
-echo -e "OS_Arch:\t $systemArch"
-echo -e "Proc_Num:\t $procNum"
-echo -e "Proc_Type:\t $procType"
-echo -e "Mem_Size:\t $memSize"
+printf "OS_Version:\t%-15s\n" "$osVersion"
+printf "OS_Arch:\t%-15s\n" "$systemArch"
+printf "Proc_Num:\t%-15s\n" "$procNum"
+printf "Proc_Type:\t%-15s\n" "$procType"
+printf "Mem_Size:\t%-15s\n" "$memSize"
 
-echo -e "\nNetwork:"
-# echo -e "\tInterface:\tMAC\tIP\tSpeed"
+echo ""
+echo  "Network:"
 printf "%12s\t%16s\t%15s\t%15s\n" "Interface" "MAC" "IP" "Speed"
 
 
@@ -52,12 +52,12 @@ do
     SPEED=None
     MAC=`ifconfig $INT | grep -i hwaddr | awk '{print $NF}'`
     MAC=`echo $MAC | awk '{if ($1 != "00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00") print $MAC; else print "00-00-00-00-00-00"}'`
-    if [ "$MAC" == "" ]; then
+    if [ "${MAC}" = "" ]; then
         MAC="None"
     fi
 
     IP=`ifconfig $INT | grep inet | cut -d':' -f2 | cut -d' ' -f1`
-    if [ "$IP" == "" ]; then
+    if [ "$IP" = "" ]; then
         IP="None"
     fi
 
@@ -68,12 +68,12 @@ done
 
                    
 if [ `whoami` = "root" ]; then
-    echo -e "\nMemory:"
+    echo "Memory:"
 #     printf "\n\t|-------|---------|-------------------\n"
     printf "\t|%4s|%8s|%10s|%18s|\n" "Qty" "Size" "Width" "Clock"
     printf "\t|%4s|%8s|%10s|%18s|\n" ____ ________ __________ __________________
 #     printf "\t|%4s|%8s|%10s|%18s|\n" ---- -------- ---------- ------------------
-    printf "\t|%4s|%8s|%10s|%18s|\n" `sudo lshw -C memory | sed -n '/-bank:/,/clock:/p' | egrep "size:|width:|clock:" | sed s'/^ *\w*: //g' | sed 's/ /_/g' | perl -pi -e 's/\n/ / if $.%3' | sort | uniq -c`
+    printf "\t|%4s|%8s|%10s|%18s|\n" `sudo lshw -C memory 2>/dev/null | sed -n '/-bank:/,/clock:/p' | egrep "size:|width:|clock:" | sed s'/^ *\w*: //g' | sed 's/ /_/g' | perl -pi -e 's/\n/ / if $.%3' | sort | uniq -c`
 #     printf "\t|%4s|%8s|%10s|%18s|\n" ---- -------- ---------- ------------------
     printf "\t|%4s|%8s|%10s|%18s|\n" ____ ________ __________ __________________
 else
