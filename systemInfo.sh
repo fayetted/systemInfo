@@ -45,7 +45,6 @@ printf "%12s\t%16s\t%15s\t%15s\n" "Interface" "MAC" "IP" "Speed"
 
 
 for INT in `ifconfig -a | awk '$0~"^[a-z]" {print $1}'`
-# for INT in lo eth0
 do
     MAC=None
     IP=None
@@ -62,7 +61,6 @@ do
     fi
 
     printf "%12s\t%16s\t%15s\t%15s\n" $INT $MAC $IP $SPEED
-#     echo -e "\t$INT\t$MAC\t$IP\t$SPEED"
 done
 
 
@@ -70,12 +68,9 @@ done
 if [ `whoami` = "root" ]; then
     echo ""
     echo "Memory:"
-#     printf "\n\t|-------|---------|-------------------\n"
     printf "\t|%4s|%8s|%10s|%18s|\n" "Qty" "Size" "Width" "Clock"
     printf "\t|%4s|%8s|%10s|%18s|\n" ____ ________ __________ __________________
-#     printf "\t|%4s|%8s|%10s|%18s|\n" ---- -------- ---------- ------------------
     printf "\t|%4s|%8s|%10s|%18s|\n" `sudo lshw -C memory 2>/dev/null | sed -n '/-bank:/,/clock:/p' | egrep "size:|width:|clock:" | sed s'/^ *\w*: //g' | sed 's/ /_/g' | perl -pi -e 's/\n/ / if $.%3' | sort | uniq -c`
-#     printf "\t|%4s|%8s|%10s|%18s|\n" ---- -------- ---------- ------------------
     printf "\t|%4s|%8s|%10s|%18s|\n" ____ ________ __________ __________________
 else
     printf "\nAdditional information is availabe if you run this script as root\n"
