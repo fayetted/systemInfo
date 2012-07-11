@@ -68,6 +68,7 @@ done
 
                    
 if [ `whoami` = "root" ]; then
+    echo ""
     echo "Memory:"
 #     printf "\n\t|-------|---------|-------------------\n"
     printf "\t|%4s|%8s|%10s|%18s|\n" "Qty" "Size" "Width" "Clock"
