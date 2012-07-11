@@ -64,3 +64,18 @@ do
     printf "%12s\t%16s\t%15s\t%15s\n" $INT $MAC $IP $SPEED
 #     echo -e "\t$INT\t$MAC\t$IP\t$SPEED"
 done
+
+
+                   
+if [ `whoami` = "root" ]; then
+    echo -e "\nMemory:"
+#     printf "\n\t|-------|---------|-------------------\n"
+    printf "\t|%4s|%8s|%10s|%18s|\n" "Qty" "Size" "Width" "Clock"
+    printf "\t|%4s|%8s|%10s|%18s|\n" ____ ________ __________ _______________
+#     printf "\t|%4s|%8s|%10s|%18s|\n" ---- -------- ---------- ---------------
+    printf "\t|%4s|%8s|%10s|%18s|\n" `sudo lshw -C memory | sed -n '/-bank:/,/clock:/p' | egrep "size:|width:|clock:" | sed s'/^ *\w*: //g' | sed 's/ /_/g' | perl -pi -e 's/\n/ / if $.%3' | sort | uniq -c`
+#     printf "\t|%4s|%8s|%10s|%18s|\n" ---- -------- ---------- ---------------
+    printf "\t|%4s|%8s|%10s|%18s|\n" ____ ________ __________ _______________
+else
+    printf "\nAdditional information is availabe if you run this script as root\n"
+fi
