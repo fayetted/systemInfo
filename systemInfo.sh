@@ -70,7 +70,8 @@ if [ `whoami` = "root" ]; then
     echo "Memory:"
     printf "\t|%4s|%8s|%10s|%18s|\n" "Qty" "Size" "Width" "Clock"
     printf "\t|%4s|%8s|%10s|%18s|\n" ____ ________ __________ __________________
-    printf "\t|%4s|%8s|%10s|%18s|\n" `sudo lshw -C memory 2>/dev/null | sed -n '/-bank:/,/clock:/p' | egrep "size:|width:|clock:" | sed s'/^ *\w*: //g' | sed 's/ /_/g' | perl -pi -e 's/\n/ / if $.%3' | sort | uniq -c`
+    printf "\t|%4s|%8s|%10s|%18s|\n" `sudo lshw -C memory 2>/dev/null | sed -n '/-bank:/,/clock:/p' | egrep "size:|width:|clock:" | sed 's/^ *//' |sed 's/ /_/g' | sed 's/width:_//; s/clock:_//' | awk '/size/{printf $0" ";next;}1'| awk '/size/{printf $0" ";next;}1' | grep ^size | sed 's/size:_//' | sort | uniq -c`
+
     printf "\t|%4s|%8s|%10s|%18s|\n" ____ ________ __________ __________________
 else
     printf "\nAdditional information is availabe if you run this script as root\n"
