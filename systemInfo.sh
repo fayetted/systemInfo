@@ -20,10 +20,11 @@ else
     systemArch=$systemArch" - Unknown"
 fi
 
+procType=`cat /proc/cpuinfo | egrep "model name" | sort | uniq | cut -f3- -d' ' | sed 's/[ \t]\+/_/g'`
 procNum=`cat /proc/cpuinfo | egrep "processor" | tail -1 | awk '{print $NF}'`
 procNum=$(expr $procNum + 1)
+procFSB=`grep "cpu MHz" /proc/cpuinfo  | awk '{print $NF}' | awk -F"." '{print $1}' | tail -1`
 
-procType=`cat /proc/cpuinfo | egrep "model name" | sort | uniq | cut -f3- -d' ' | sed 's/[ \t]\+/_/g'`
 
 memSize=`grep MemTotal /proc/meminfo | awk '{print $2}'`
 memSize=`echo "scale=2; $memSize / 1000" | bc`
@@ -33,16 +34,41 @@ memSize=`echo "scale=2; $memSize / 1000" | bc`
     # print it as a floating point with 2 decimal places.
 memSize=`echo "$memSize 1000" | awk '{if ($1 < 1000) print $1" MB"; else printf("%.2f%3s\n",$1/$2, "GB")}'`
 
+
 printf "OS_Version:\t%-15s\n" "$osVersion"
 printf "OS_Arch:\t%-15s\n" "$systemArch"
-printf "Proc_Num:\t%-15s\n" "$procNum"
-printf "Proc_Type:\t%-15s\n" "$procType"
-printf "Mem_Size:\t%-15s\n" "$memSize"
+
+
+#
+## Extra info if you run as root.
+#                   
+if [ `whoami` = "root" ]; then
+    echo ""
+    echo "Memory:"
+    printf "\t| %6s | %10s | %10s | %18s |\n" "Qty" "Size" "Width" "Clock"
+    printf "\t| %6s | %10s | %10s | %18s |\n" ______ __________ __________ __________________
+    printf "\t| %6s | %10s | %10s | %18s |\n" `lshw -C memory 2>/dev/null | sed -n '/-bank:/,/clock:/p' | egrep "bank:|size:|width:|clock:" | sed 's/^ *//' | sed 's/ /_/g' | sed 's/^*-//g' | sed 's/width:_//; s/clock:_//' | awk '/size/{printf $0" ";next;}1'| awk '/size/{printf $0" ";next;}1' | awk '/bits$/{printf $0" ";next;}1' | awk '/bank/{printf $0" ";next;}1' | sed 's/^bank:\w*/bank/g' | sed 's/bank size:_//g' | sed 's/bank /empty /g' | sort | uniq -c`
+    printf "\t| %6s | %10s | %10s | %18s |\n" ______ __________ __________ __________________
+    printf "\t| %6s | %10s |\n" "Total:" "$memSize"
+
+else
+
+    echo ""
+    echo "Memory:"
+    printf "\t%6s  %10s\n" "Total:" "$memSize"
+
+fi
+
+echo ""
+echo "CPU:"
+printf "\t| %50s | %8s | %8s |\n" "CPU" "FSB" "Cores"
+printf "\t| %50s | %8s | %8s |\n" ------------------------------------------------- -------- --------
+printf "\t| %50s | %8s | %8s |\n" $procType $procFSB $procNum
+printf "\t| %50s | %8s | %8s |\n" ------------------------------------------------- -------- --------
 
 echo ""
 echo  "Network:"
 printf "%12s\t%16s\t%15s\t%15s\n" "Interface" "MAC" "IP" "Speed"
-
 
 for INT in `ifconfig -a | awk '$0~"^[a-z]" {print $1}'`
 do
@@ -63,34 +89,7 @@ do
     printf "%12s\t%16s\t%15s\t%15s\n" $INT $MAC $IP $SPEED
 done
 
-
-#
-## Extra info if you run as root.
-#                   
-if [ `whoami` = "root" ]; then
-    echo ""
-    echo "Memory:"
-    printf "\t| %4s | %8s | %10s | %18s |\n" "Qty" "Size" "Width" "Clock"
-    printf "\t| %4s | %8s | %10s | %18s |\n" ____ ________ __________ __________________
-    printf "\t| %4s | %8s | %10s | %18s |\n" `lshw -C memory 2>/dev/null | sed -n '/-bank:/,/clock:/p' | egrep "bank:|size:|width:|clock:" | sed 's/^ *//' | sed 's/ /_/g' | sed 's/^*-//g' | sed 's/width:_//; s/clock:_//' | awk '/size/{printf $0" ";next;}1'| awk '/size/{printf $0" ";next;}1' | awk '/bits$/{printf $0" ";next;}1' | awk '/bank/{printf $0" ";next;}1' | sed 's/^bank:\w*/bank/g' | sed 's/bank size:_//g' | sed 's/bank /empty /g' | sort | uniq -c`
-    printf "\t| %4s | %8s | %10s | %18s |\n" ____ ________ __________ __________________
-
-    echo ""
-    echo "CPU:"
-    printf "\t| %50s | %8s | %8s |\n" "CPU" "Bus" "FSB"
-    printf "\t| %50s | %8s | %8s |\n" ------------------------------------------------- -------- --------
-    printf "\t| %50s | %8s | %8s |\n" `lshw -c processor 2>/dev/null | sed 's/^ *//g' | egrep "product:|size:|clock:" | sed 's/ /_/g' | sed 's/\w*:_//g' | perl -pi -e 's/\n/ / if $.%3'`
-    printf "\t| %50s | %8s | %8s |\n" ------------------------------------------------- -------- --------
-
-else
-
-    echo ""
-    echo "CPU:"
-    printf "\t| %50s | %8s |\n" "CPU" "FSB"
-    printf "\t| %50s | %8s |\n" ------------------------------------------------- --------
-    printf "\t| %50s | %8s |\n" `lshw -c processor 2>/dev/null | sed 's/^ *//g' | egrep "product:|size:|clock:" | sed 's/ /_/g' | sed 's/\w*:_//g' | perl -pi -e 's/\n/ / if $.%3'`
-    printf "\t| %50s | %8s |\n" ------------------------------------------------- --------
-
+if [ `whoami` != "root" ]; then
     printf "\n\n\t*** Additional information is availabe if you run this script as root ***\n"
 fi
 
