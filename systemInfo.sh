@@ -64,13 +64,15 @@ do
 done
 
 
-                   
+#
+## Extra info if you run as root.
+#                   
 if [ `whoami` = "root" ]; then
     echo ""
     echo "Memory:"
     printf "\t|%4s|%8s|%10s|%18s|\n" "Qty" "Size" "Width" "Clock"
     printf "\t|%4s|%8s|%10s|%18s|\n" ____ ________ __________ __________________
-    printf "\t|%4s|%8s|%10s|%18s|\n" `sudo lshw -C memory 2>/dev/null | sed -n '/-bank:/,/clock:/p' | egrep "size:|width:|clock:" | sed 's/^ *//' |sed 's/ /_/g' | sed 's/width:_//; s/clock:_//' | awk '/size/{printf $0" ";next;}1'| awk '/size/{printf $0" ";next;}1' | grep ^size | sed 's/size:_//' | sort | uniq -c`
+    printf "\t|%4s|%8s|%10s|%18s|\n" `lshw -C memory 2>/dev/null | sed -n '/-bank:/,/clock:/p' | egrep "bank:|size:|width:|clock:" | sed 's/^ *//' | sed 's/ /_/g' | sed 's/^*-//g' | sed 's/width:_//; s/clock:_//' | awk '/size/{printf $0" ";next;}1'| awk '/size/{printf $0" ";next;}1' | awk '/bits$/{printf $0" ";next;}1' | awk '/bank/{printf $0" ";next;}1' | sed 's/^bank:\w*/bank/g' | sed 's/bank size:_//g' | sed 's/bank /empty /g' | sort | uniq -c`
 
     printf "\t|%4s|%8s|%10s|%18s|\n" ____ ________ __________ __________________
 else
