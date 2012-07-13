@@ -70,11 +70,28 @@ done
 if [ `whoami` = "root" ]; then
     echo ""
     echo "Memory:"
-    printf "\t|%4s|%8s|%10s|%18s|\n" "Qty" "Size" "Width" "Clock"
-    printf "\t|%4s|%8s|%10s|%18s|\n" ____ ________ __________ __________________
-    printf "\t|%4s|%8s|%10s|%18s|\n" `lshw -C memory 2>/dev/null | sed -n '/-bank:/,/clock:/p' | egrep "bank:|size:|width:|clock:" | sed 's/^ *//' | sed 's/ /_/g' | sed 's/^*-//g' | sed 's/width:_//; s/clock:_//' | awk '/size/{printf $0" ";next;}1'| awk '/size/{printf $0" ";next;}1' | awk '/bits$/{printf $0" ";next;}1' | awk '/bank/{printf $0" ";next;}1' | sed 's/^bank:\w*/bank/g' | sed 's/bank size:_//g' | sed 's/bank /empty /g' | sort | uniq -c`
+    printf "\t| %4s | %8s | %10s | %18s |\n" "Qty" "Size" "Width" "Clock"
+    printf "\t| %4s | %8s | %10s | %18s |\n" ____ ________ __________ __________________
+    printf "\t| %4s | %8s | %10s | %18s |\n" `lshw -C memory 2>/dev/null | sed -n '/-bank:/,/clock:/p' | egrep "bank:|size:|width:|clock:" | sed 's/^ *//' | sed 's/ /_/g' | sed 's/^*-//g' | sed 's/width:_//; s/clock:_//' | awk '/size/{printf $0" ";next;}1'| awk '/size/{printf $0" ";next;}1' | awk '/bits$/{printf $0" ";next;}1' | awk '/bank/{printf $0" ";next;}1' | sed 's/^bank:\w*/bank/g' | sed 's/bank size:_//g' | sed 's/bank /empty /g' | sort | uniq -c`
+    printf "\t| %4s | %8s | %10s | %18s |\n" ____ ________ __________ __________________
 
-    printf "\t|%4s|%8s|%10s|%18s|\n" ____ ________ __________ __________________
+    echo ""
+    echo "CPU:"
+    printf "\t| %50s | %8s | %8s |\n" "CPU" "Bus" "FSB"
+    printf "\t| %50s | %8s | %8s |\n" ------------------------------------------------- -------- --------
+    printf "\t| %50s | %8s | %8s |\n" `lshw -c processor 2>/dev/null | sed 's/^ *//g' | egrep "product:|size:|clock:" | sed 's/ /_/g' | sed 's/\w*:_//g' | perl -pi -e 's/\n/ / if $.%3'`
+    printf "\t| %50s | %8s | %8s |\n" ------------------------------------------------- -------- --------
+
 else
-    printf "\nAdditional information is availabe if you run this script as root\n"
+
+    echo ""
+    echo "CPU:"
+    printf "\t| %50s | %8s |\n" "CPU" "FSB"
+    printf "\t| %50s | %8s |\n" ------------------------------------------------- --------
+    printf "\t| %50s | %8s |\n" `lshw -c processor 2>/dev/null | sed 's/^ *//g' | egrep "product:|size:|clock:" | sed 's/ /_/g' | sed 's/\w*:_//g' | perl -pi -e 's/\n/ / if $.%3'`
+    printf "\t| %50s | %8s |\n" ------------------------------------------------- --------
+
+    printf "\n\n\t*** Additional information is availabe if you run this script as root ***\n"
 fi
+
+echo ""
