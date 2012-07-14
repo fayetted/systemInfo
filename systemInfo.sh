@@ -68,13 +68,13 @@ printf "\t| %50s | %8s | %8s |\n" ----------------------------------------------
 
 echo ""
 echo  "Network:"
-printf "%12s\t%16s\t%15s\t%15s\n" "Interface" "MAC" "IP" "Speed"
+printf "\t| %12s | %17s | %15s | %15s |\n" "Interface" "MAC" "IP" "Speed"
+printf "\t| %12s | %17s | %15s | %15s |\n" ------------ ----------------- --------------- ---------------
 
 for INT in `ifconfig -a | awk '$0~"^[a-z]" {print $1}'`
 do
     MAC=None
     IP=None
-    SPEED=None
     MAC=`ifconfig $INT | grep -i hwaddr | awk '{print $NF}'`
     MAC=`echo $MAC | awk '{if ($1 != "00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00") print $MAC; else print "00-00-00-00-00-00"}'`
     if [ "${MAC}" = "" ]; then
@@ -86,7 +86,12 @@ do
         IP="None"
     fi
 
-    printf "%12s\t%16s\t%15s\t%15s\n" $INT $MAC $IP $SPEED
+    SPEED=`mii-tool $INT 2>/dev/null | awk '{print $3}' | sed 's/,$//g; s/0b/0_b/g'`
+    if [ "$SPEED" = "" ]; then
+        SPEED="N/A"
+    fi
+
+    printf "\t| %12s | %17s | %15s | %15s |\n" $INT $MAC $IP $SPEED
 done
 
 if [ `whoami` != "root" ]; then
