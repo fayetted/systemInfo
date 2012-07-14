@@ -37,8 +37,10 @@ memSize=`echo "scale=2; $memSize / 1000" | bc`
 memSize=`echo "$memSize 1000" | awk '{if ($1 < 1000) print $1" MB"; else printf("%.2f%3s\n",$1/$2, "GB")}'`
 
 
-printf "OS_Version:\t%-15s\n" "$osVersion"
-printf "OS_Arch:\t%-15s\n" "$systemArch"
+echo ""
+echo "OS:"
+printf "\t%8s\t%-15s\n" "Version:" "$osVersion"
+printf "\t%-8s\t%-15s\n" "Arch:" "$systemArch"
 
 echo ""
 echo "Video:"
