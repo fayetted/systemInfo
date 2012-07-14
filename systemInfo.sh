@@ -20,6 +20,8 @@ else
     systemArch=$systemArch" - Unknown"
 fi
 
+vid=`lspci | grep -i vga | awk -F: '{print $3}' | sed 's/^ //'`
+
 procType=`cat /proc/cpuinfo | egrep "model name" | sort | uniq | cut -f3- -d' ' | sed 's/[ \t]\+/_/g'`
 procNum=`cat /proc/cpuinfo | egrep "processor" | tail -1 | awk '{print $NF}'`
 procNum=$(expr $procNum + 1)
@@ -37,6 +39,10 @@ memSize=`echo "$memSize 1000" | awk '{if ($1 < 1000) print $1" MB"; else printf(
 
 printf "OS_Version:\t%-15s\n" "$osVersion"
 printf "OS_Arch:\t%-15s\n" "$systemArch"
+
+echo ""
+echo "Video:"
+printf "\t%-50s\n" "$vid"
 
 
 #
@@ -62,9 +68,9 @@ fi
 echo ""
 echo "CPU:"
 printf "\t| %50s | %8s | %8s |\n" "CPU" "FSB" "Cores"
-printf "\t| %50s | %8s | %8s |\n" ------------------------------------------------- -------- --------
+printf "\t| %50s | %8s | %8s |\n" -------------------------------------------------- -------- --------
 printf "\t| %50s | %8s | %8s |\n" $procType $procFSB $procNum
-printf "\t| %50s | %8s | %8s |\n" ------------------------------------------------- -------- --------
+printf "\t| %50s | %8s | %8s |\n" -------------------------------------------------- -------- --------
 
 echo ""
 echo  "Network:"
