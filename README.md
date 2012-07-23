@@ -1,7 +1,12 @@
-systemInfo
-==========
+# systemInfo #
 
-Simple script to list common system information
+Simple script to list common system information on Linux systems.
 
-== TODO ==
+
+## Tested on ##
+* Ubuntu 12.04
+* Ubuntu 10.03
+
+
+## TODO ##
 * Hard Drive info
