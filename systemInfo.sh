@@ -9,7 +9,15 @@
 # Required Files:                                               ///
 #//////////////////////////////////////////////////////////////////
 
-osVersion=`lsb_release -d | cut -f2-`
+if [ -f "/etc/redhat-release" ]; then
+    osVersion=`cat /etc/redhat-release`
+else
+    osVersion=`lsb_release -d | cut -f2-`
+fi
+
+if [ "$osVersion" = "" ]; then
+    osVersion="Unknown"
+fi
 
 systemArch=`arch`
 if [ $systemArch = "i686" ]; then
@@ -32,7 +40,7 @@ memSize=`grep MemTotal /proc/meminfo | awk '{print $2}'`
 memSize=`echo "scale=2; $memSize / 1000" | bc`
 # Bash doesn't handle floating points well so we do what we need in awk
     # If the mem size is less than 1,000 then print the raw size + "MB"
-    # If the mem size is greater than 1GB then divide the raw number by 1,000 and 
+    # If the mem size is greater than 1GB then divide the raw number by 1,000 and
     # print it as a floating point with 2 decimal places.
 memSize=`echo "$memSize 1000" | awk '{if ($1 < 1000) print $1" MB"; else printf("%.2f%3s\n",$1/$2, "GB")}'`
 
@@ -49,7 +57,7 @@ printf "\t%-50s\n" "$vid"
 
 #
 ## Extra info if you run as root.
-#                   
+#
 if [ `whoami` = "root" ]; then
     echo ""
     echo "Memory:"
