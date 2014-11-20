@@ -61,12 +61,21 @@ printf "\t%-50s\n" "$vid"
 if [ `whoami` = "root" ]; then
     echo ""
     echo "Memory:"
-    printf "\t| %6s | %10s | %10s | %18s |\n" "Qty" "Size" "Width" "Clock"
-    printf "\t| %6s | %10s | %10s | %18s |\n" ______ __________ __________ __________________
-    printf "\t| %6s | %10s | %10s | %18s |\n" `lshw -C memory 2>/dev/null | sed -n '/-bank:/,/clock:/p' | egrep "bank:|size:|width:|clock:" | sed 's/^ *//' | sed 's/ /_/g' | sed 's/^*-//g' | sed 's/width:_//; s/clock:_//' | awk '/size/{printf $0" ";next;}1'| awk '/size/{printf $0" ";next;}1' | awk '/bits$/{printf $0" ";next;}1' | awk '/bank/{printf $0" ";next;}1' | sed 's/^bank:\w*/bank/g' | sed 's/bank size:_//g' | sed 's/bank /empty /g' | sort | uniq -c`
-    printf "\t| %6s | %10s | %10s | %18s |\n" ______ __________ __________ __________________
-    printf "\t| %6s | %10s |\n" "Total:" "$memSize"
 
+    if `echo "$osVersion" | awk '{print $1}'` == "CentOS" ]; then
+        printf "\t| %6s | %10s | %10s |\n" "Qty" "Size" "Width"
+        printf "\t| %6s | %10s | %10s |\n" ______ __________ __________
+        printf "\t| %6s | %10s | %10s |\n" `lshw -C memory 2>/dev/null | sed -n '/-bank:/,/clock:/p' | egrep "bank:|size:|width:|clock:" | sed 's/^ *//' | sed 's/ /_/g' | se
+d 's/^*-//g' | sed 's/width:_//; s/clock:_//' | awk '/size/{printf $0" ";next;}1' | sed '/^bank\:[0-9]*/d' | sed 's/size:_//g' | sort | uniq -c`
+        printf "\t| %6s | %10s | %10s |\n" ______ __________ __________
+        printf "\t| %6s | %10s |\n" "Total:" "$memSize"
+    else
+        printf "\t| %6s | %10s | %10s | %18s |\n" "Qty" "Size" "Width" "Clock"
+        printf "\t| %6s | %10s | %10s | %18s |\n" ______ __________ __________ __________________
+        printf "\t| %6s | %10s | %10s | %18s |\n" `lshw -C memory 2>/dev/null | sed -n '/-bank:/,/clock:/p' | egrep "bank:|size:|width:|clock:" | sed 's/^ *//' | sed 's/ /_/g' | sed 's/^*-//g' | sed 's/width:_//; s/clock:_//' | awk '/size/{printf $0" ";next;}1'| awk '/size/{printf $0" ";next;}1' | awk '/bits$/{printf $0" ";next;}1' | awk '/bank/{printf $0" ";next;}1' | sed 's/^bank:\w*/bank/g' | sed 's/bank size:_//g' | sed 's/bank /empty /g' | sort | uniq -c`
+        printf "\t| %6s | %10s | %10s | %18s |\n" ______ __________ __________ __________________
+        printf "\t| %6s | %10s |\n" "Total:" "$memSize"
+    fi
 else
 
     echo ""
