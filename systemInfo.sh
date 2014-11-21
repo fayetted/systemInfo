@@ -52,8 +52,7 @@ printf "\t%-8s\t%-15s\n" "Arch:" "$systemArch"
 
 echo ""
 echo "Video:"
-printf "\t%-50s\n" "$vid"
-
+echo "$vid" | while read card; do printf "\t%-50s\n" "$card"; done
 
 #
 ## Extra info if you run as root.
@@ -62,7 +61,7 @@ if [ `whoami` = "root" ]; then
     echo ""
     echo "Memory:"
 
-    if `echo "$osVersion" | awk '{print $1}'` == "CentOS" ]; then
+    if [ "`echo $osVersion | awk '{print $1}'`" = "CentOS" ]; then
         printf "\t| %6s | %10s | %10s |\n" "Qty" "Size" "Width"
         printf "\t| %6s | %10s | %10s |\n" ______ __________ __________
         printf "\t| %6s | %10s | %10s |\n" `lshw -C memory 2>/dev/null | sed -n '/-bank:/,/clock:/p' | egrep "bank:|size:|width:|clock:" | sed 's/^ *//' | sed 's/ /_/g' | se
