@@ -110,9 +110,12 @@ do
         IP="None"
     fi
 
-    SPEED=`mii-tool $INT 2>/dev/null | awk '{print $3}' | sed 's/,$//g; s/0b/0_b/g'`
+    SPEED=`mii-tool $INT 2>/dev/null | sed 's/.*negotiat.*\(1.*\).*flow.*/\1/g'`
     if [ "$SPEED" = "" ]; then
         SPEED="N/A"
+    fi
+    if [ "$SPEED" = "$INT: no link" ]; then
+        SPEED="no_link"
     fi
 
     printf "\t| %12s | %17s | %15s | %15s |\n" $INT $MAC $IP $SPEED
