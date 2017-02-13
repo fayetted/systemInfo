@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 #//////////////////////////////////////////////////////////////////
 # Dan Fayette   mailto:fayetted@google.com                      ///
 # 20120620                                                      ///
@@ -8,6 +8,8 @@
 #                                                               ///
 # Required Files:                                               ///
 #//////////////////////////////////////////////////////////////////
+
+readonly program="$(basename "$0")"
 
 if [ -f "/etc/redhat-release" ]; then
     osVersion=`cat /etc/redhat-release`
@@ -57,7 +59,7 @@ echo "$vid" | while read card; do printf "\t%-50s\n" "$card"; done
 #
 ## Extra info if you run as root.
 #
-if [ `whoami` = "root" ]; then
+if [ `whoami` == "root" ]; then
     echo ""
     echo "Memory:"
 
@@ -82,6 +84,74 @@ else
     printf "\t%6s  %10s\n" "Total:" "$memSize"
 
 fi
+
+
+# Disk Info
+if [ "`whoami`" == "root" ]; then
+#     lshw -c disk > /tmp/$program.log 2>&1
+    echo ""
+    echo "Disk:"
+    printf "\t| %10s | %7s | %10s | %18s | %17s | %14s | %26s |\n" "Device" "size" "Vendor" "Model" "SN" "Hours (years)" "Health"
+    printf "\t| %10s | %7s | %10s | %18s | %17s | %14s | %26s |\n" | tr ' ' -
+
+    while read -r line
+    do
+        if [[ $line =~ ^'*-disk' ]]; then
+            disk=True
+        elif [[ $line =~ ^'*-cdrom' ]]; then
+            disk=False
+        fi
+
+        if [[ $disk == "True" ]]; then
+            if [[ $line =~ ^'vendor' ]]; then
+                vendor=`echo "$line" | sed 's/vendor: //g'`
+            elif [[ $line =~ ^'product' ]]; then
+                product=`echo $line | sed 's/product: //g'`
+            elif [[ $line =~ ^'logical' ]]; then
+                logical=`echo $line | awk '{print $3}'`
+            elif [[ $line =~ ^'serial' ]]; then
+                serial=`echo $line | sed 's/serial: //g'`
+            elif [[ $line =~ ^'size' ]]; then
+                size=`echo $line | awk '{print $NF}'`
+                if [[ `command -v smartctl` ]]; then
+                    tmpLine=`smartctl -l xselftest,1 $logical | egrep "^#"`
+                    # 8772 hours in a year.
+                    hours=`echo $tmpLine | sed 's/^.* \([0-9]\+ \).*/\1/g'`
+                    tmpHours=$hours
+                    years=0
+                    if [ "$hours" ]; then
+                        while [ $tmpHours -gt 8772 ]; do
+                            : $((years++))
+                            tmpHours=$((tmpHours-8772))
+                        done
+                        if [ $years -gt 0 ]; then
+                            hours="$hours($years)"
+                        fi
+                        health=`echo $tmpLine | sed 's/^.*line//g; s/[0-9].*//g'`
+                    else
+                        hours="N/A"
+                        health="N/A"
+                    fi
+                else
+                    hours="N/A"
+                    health="N/A"
+                fi
+                printf "\t| %10s | %7s | %10s | %18s | %17s | %14s | %26s |\n" "$logical" "$size" "$vendor" "$product" "$serial" "$hours" "$health"
+                vendor=""
+                product=""
+                logical=""
+                serial=""
+                size=""
+                hours=""
+                years=""
+                health=""
+            fi
+        fi
+    done < <( lshw -C disk 2>&1 )
+    echo ""
+fi
+
+
 
 echo ""
 echo "CPU:"
